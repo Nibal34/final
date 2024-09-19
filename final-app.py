@@ -51,6 +51,59 @@ In the sections below, we will explore two key aspects of the data:
 2. **Average Family Size vs. Elderly Population**: A scatter plot analyzing the relationship between average family sizes and the percentage of elderly people in each town.
 """)
 
+# Strip any leading or trailing spaces from column names
+df.columns = df.columns.str.strip()
+
+# Bar Chart: Percentage of Women, Men, Youth, and Eldelry by Town
+st.write("### Gender and Age Distribution by Town")
+
+# Select which percentages to show
+selected_columns = st.multiselect(
+    'Select data to visualize:', 
+    options=['Percentage of Women', 'Percentage of Men', 'Percentage of Youth - 15-24 years', 'Percentage of Eldelry - 65 or more years'],
+    default=['Percentage of Women', 'Percentage of Men']
+)
+
+# Plot the selected columns for each town
+df_plot = df[['Town'] + selected_columns]
+df_plot = df_plot.melt(id_vars='Town', var_name='Category', value_name='Percentage')
+
+fig = px.bar(df_plot, x='Town', y='Percentage', color='Category', 
+             title='Distribution by Town', barmode='group')
+
+# Display the chart
+st.plotly_chart(fig)
+
+# Scatter Plot: Average Family Size vs. Percentage of Youth or Eldelry
+st.write("### Average Family Size vs. Percentage of Youth or Eldelry")
+
+# Let the user select between youth or elderly for the scatter plot
+age_group = st.radio("Select the age group:", 
+                     ('Percentage of Youth - 15-24 years', 'Percentage of Eldelry - 65 or more years'))
+
+# Calculate the average family size
+df['Average family size'] = (
+    1.5 * df['Average family size - 1 to 3 members'] + 
+    5 * df['Average family size - 4 to 6 members'] + 
+    7 * df['Average family size - 7 or more members']
+    ) / (
+        df['Average family size - 1 to 3 members'] +
+        df['Average family size - 4 to 6 members'] +
+        df['Average family size - 7 or more members']
+    )
+
+# Create scatter plot
+fig_scatter = px.scatter(
+    df, x='Average family size', y=age_group, hover_name='Town', 
+    title=f'Average Family Size vs. {age_group}', 
+    labels={'Average family size': 'Average Family Size', age_group: age_group},
+    color='Town'
+)
+
+# Display the scatter plot
+st.plotly_chart(fig_scatter)
+
+
 # Clean up the column names by stripping any leading or trailing spaces
 df.columns = df.columns.str.strip()
 
@@ -180,54 +233,3 @@ if submit_button:
     
 
 
-# Strip any leading or trailing spaces from column names
-df.columns = df.columns.str.strip()
-
-# Bar Chart: Percentage of Women, Men, Youth, and Eldelry by Town
-st.write("### Gender and Age Distribution by Town")
-
-# Select which percentages to show
-selected_columns = st.multiselect(
-    'Select data to visualize:', 
-    options=['Percentage of Women', 'Percentage of Men', 'Percentage of Youth - 15-24 years', 'Percentage of Eldelry - 65 or more years'],
-    default=['Percentage of Women', 'Percentage of Men']
-)
-
-# Plot the selected columns for each town
-df_plot = df[['Town'] + selected_columns]
-df_plot = df_plot.melt(id_vars='Town', var_name='Category', value_name='Percentage')
-
-fig = px.bar(df_plot, x='Town', y='Percentage', color='Category', 
-             title='Distribution by Town', barmode='group')
-
-# Display the chart
-st.plotly_chart(fig)
-
-# Scatter Plot: Average Family Size vs. Percentage of Youth or Eldelry
-st.write("### Average Family Size vs. Percentage of Youth or Eldelry")
-
-# Let the user select between youth or elderly for the scatter plot
-age_group = st.radio("Select the age group:", 
-                     ('Percentage of Youth - 15-24 years', 'Percentage of Eldelry - 65 or more years'))
-
-# Calculate the average family size
-df['Average family size'] = (
-    1.5 * df['Average family size - 1 to 3 members'] + 
-    5 * df['Average family size - 4 to 6 members'] + 
-    7 * df['Average family size - 7 or more members']
-    ) / (
-        df['Average family size - 1 to 3 members'] +
-        df['Average family size - 4 to 6 members'] +
-        df['Average family size - 7 or more members']
-    )
-
-# Create scatter plot
-fig_scatter = px.scatter(
-    df, x='Average family size', y=age_group, hover_name='Town', 
-    title=f'Average Family Size vs. {age_group}', 
-    labels={'Average family size': 'Average Family Size', age_group: age_group},
-    color='Town'
-)
-
-# Display the scatter plot
-st.plotly_chart(fig_scatter)
